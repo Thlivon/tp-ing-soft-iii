@@ -12,6 +12,10 @@ archivo = st.file_uploader(
     help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia"
 )
 
+# Sección visual que indica al usuario que también puede arrastrar el archivo
+with st.container():
+    st.info("También podés arrastrar tu archivo directamente sobre el área de carga.")
+
 # Si el usuario seleccionó un archivo, mostramos su nombre como confirmación
 if archivo is not None:
     st.success(f"Archivo seleccionado: {archivo.name}")
