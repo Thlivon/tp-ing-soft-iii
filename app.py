@@ -8,7 +8,8 @@ st.write("Seleccioná tu archivo de chat exportado desde WhatsApp para comenzar 
 
 # Widget que permite al usuario seleccionar un archivo desde el explorador de archivos
 archivo = st.file_uploader(
-    label="Seleccioná tu archivo de chat",
+    label="Seleccioná tu archivo de chat en formato .txt o .zip",
+    type=["txt", "zip"],
     help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia"
 )
 
@@ -16,6 +17,11 @@ archivo = st.file_uploader(
 with st.container():
     st.info("También podés arrastrar tu archivo directamente sobre el área de carga.")
 
-# Si el usuario seleccionó un archivo, mostramos su nombre como confirmación
+# Si el usuario seleccionó un archivo, mostramos su nombre como confirmación.
+# Además, si el archivo tiene un formato inválido, muestra un mensaje de error.
 if archivo is not None:
-    st.success(f"Archivo seleccionado: {archivo.name}")
+    extension = archivo.name.split(".")[-1].lower()
+    if extension not in ["txt", "zip"]:
+        st.error("Formato no válido. Solo se aceptan archivos .txt o .zip.")
+    else:
+        st.success(f"Archivo seleccionado: {archivo.name}")
