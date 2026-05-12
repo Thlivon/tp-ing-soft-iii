@@ -41,3 +41,20 @@ def emoji_mas_utilizado(df):
     emoji_mas_usado = max(contador, key=contador.get)
 
     return emoji_mas_usado, contador[emoji_mas_usado]
+
+def horario_mas_activo(df):
+    if df.empty:
+        return None, 0
+
+    horas = df["fecha"].dt.hour
+
+    contador = horas.value_counts()
+
+    hora_inicio = contador.idxmax()
+    cantidad = contador.max()
+
+    hora_fin = (hora_inicio + 1) % 24
+
+    franja = f"{hora_inicio:02d}:00 - {hora_fin:02d}:00"
+
+    return franja, cantidad
