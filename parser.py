@@ -12,15 +12,26 @@ def parse_chat(file):
     """Lee el archivo subido y devuelve un DataFrame con columnas: fecha, usuario, mensaje."""
     lineas = file.read().decode("utf-8").splitlines()
     registros = []
+    mensaje_actual = None
 
     for linea in lineas:
         match = PATTERN.match(linea)
         if match:
+            # Si había un mensaje acumulado, lo guardamos antes de arrancar uno nuevo
+            if mensaje_actual:
+                registros.append(mensaje_actual)
             fecha_str = f"{match.group(1)} {match.group(2)}"
-            registros.append({
+            mensaje_actual = {
                 "fecha":   pd.to_datetime(fecha_str, dayfirst=True),
                 "usuario": match.group(3).strip(),
                 "mensaje": match.group(4),
-            })
+            }
+        elif mensaje_actual:
+            # Línea que continúa el mensaje anterior (mensaje multilínea)
+            mensaje_actual["mensaje"] += f" {linea.strip()}"
+
+    # Guardamos el último mensaje que quedó pendiente
+    if mensaje_actual:
+        registros.append(mensaje_actual)
 
     return pd.DataFrame(registros)
