@@ -1,0 +1,5 @@
+﻿12/4/25, 21:03 - Juan: Hola Maria, como estas?
+12/4/25, 21:05 - Maria: Hola Juan! Todo bien por aca.
+12/4/25, 21:06 - Juan: Genial! Te cuento que termine el trabajo practico.
+12/4/25, 21:07 - Maria: Que bueno! Y como te fue?
+12/4/25, 21:08 - Juan: Muy bien, aprobe todo.
