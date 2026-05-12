@@ -35,3 +35,7 @@ def parse_chat(file):
         registros.append(mensaje_actual)
 
     return pd.DataFrame(registros)
+
+def chat_a_json(df):
+    """Convierte el DataFrame del chat a una lista de diccionarios en formato JSON."""
+    return df.to_dict(orient="records")

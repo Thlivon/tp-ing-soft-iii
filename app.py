@@ -1,6 +1,6 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
-from parser import parse_chat
+from parser import parse_chat, chat_a_json
 
 st.set_page_config(page_title="Analizador de chats de WhatsApp", layout="wide")
 
@@ -31,4 +31,6 @@ if archivo is not None:
         if df.empty:
             st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat de WhatsApp válido.")
         else:
-            st.success(f"Chat procesado correctamente. Se encontraron {len(df)} mensajes.")
+            # Convertimos el DataFrame a JSON para uso posterior
+            mensajes_json = chat_a_json(df)
+            st.success(f"Chat procesado correctamente. Se encontraron {len(mensajes_json)} mensajes.")
