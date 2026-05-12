@@ -112,7 +112,7 @@ def frecuencia_palabras(df):
     contador = {}
 
     for mensaje in df["mensaje"]:
-        
+
         # Ignoro los emojis normalizados
         mensaje = re.sub(r":[a-zA-Z0-9_&+-]+:", "", mensaje)
 
@@ -131,3 +131,11 @@ def frecuencia_palabras(df):
                     contador[palabra] = 1
 
     return contador
+
+# Devuelve una lista con las palabras frecuentes ordenadas de mas frecuentes a menos frecuentes
+def ordenar_frecuencias(contador):
+    return sorted(
+        contador.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )
