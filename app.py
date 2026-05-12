@@ -1,6 +1,7 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
 from parser import parse_chat, chat_a_json
+from analytics import usuario_mas_activo
 
 st.set_page_config(page_title="Analizador de chats de WhatsApp", layout="wide")
 
@@ -27,6 +28,10 @@ if archivo is not None:
     else:
         # Procesamos el archivo y convertimos el chat en un DataFrame
         df = parse_chat(archivo)
+
+        usuario, cantidad = usuario_mas_activo(df)
+        st.subheader("Usuario más activo")
+        st.write(f"{usuario} envió {cantidad} mensajes.")
 
         if df.empty:
             st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat de WhatsApp válido.")
