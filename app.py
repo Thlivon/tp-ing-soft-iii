@@ -1,7 +1,7 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
 from parser import parse_chat, chat_a_json
-from analytics import usuario_mas_activo, emoji_mas_utilizado, horario_mas_activo, actividad_por_dia, ranking_actividad
+from analytics import usuario_mas_activo, emoji_mas_utilizado, horario_mas_activo, actividad_por_dia, ranking_actividad, frecuencia_palabras
 import emoji as emoji_lib
 
 st.set_page_config(page_title="Analizador de chats de WhatsApp", layout="wide")
@@ -58,6 +58,11 @@ if archivo is not None:
             st.subheader("Ranking de actividad por día de la semana")
             for dia, porcentaje in ranking.items():
                 st.write(f"{dia}: {porcentaje}%")
+
+            palabras_frecuentes = frecuencia_palabras(df)
+            st.subheader("Palabras más frecuentes")
+            for palabra, frec in palabras_frecuentes.items():
+                st.write(f"{palabra}: {frec} veces")
 
 
 

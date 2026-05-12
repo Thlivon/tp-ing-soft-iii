@@ -97,3 +97,37 @@ def ranking_actividad(df):
     porcentajes = round((contador / len(df)) * 100, 2)
 
     return porcentajes
+
+# Devuelve una lista con las palabras mas frecuentes y la frecuencia con la que aparecen
+def frecuencia_palabras(df):
+    if df.empty:
+        return {}
+
+    # No cuento las palabras de la lista por ser conectores, preposiciones, artículos, etc. que no aportan al análisis
+    STOPWORDS = {
+        "de", "la", "que", "el", "y", "a",
+        "en", "un", "una", "es", "por", ":[a-zA-Z0-9_&+-]+:"
+    }
+
+    contador = {}
+
+    for mensaje in df["mensaje"]:
+        
+        # Ignoro los emojis normalizados
+        mensaje = re.sub(r":[a-zA-Z0-9_&+-]+:", "", mensaje)
+
+        palabras = mensaje.lower().split()
+
+
+        for palabra in palabras:
+            # Ignoro los signos de puntuacion para contar las palabras
+            palabra = palabra.strip(".,!?¿¡()[]{}:;\"'")
+
+            if palabra and palabra not in STOPWORDS:
+
+                if palabra in contador:
+                    contador[palabra] += 1
+                else:
+                    contador[palabra] = 1
+
+    return contador
