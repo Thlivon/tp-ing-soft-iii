@@ -1,6 +1,7 @@
 # AQUÍ IRÁ LA LÓGICA RELACIONADA AL PROCESAMIENTO DEL ARCHIVO
 import re
 import pandas as pd
+import emoji as emoji_lib
 
 # Patrón que matchea el formato estándar de exportación de WhatsApp (Android)
 # Ejemplo de línea: 12/4/25, 21:03 - Nico: hola cómo andan
@@ -24,7 +25,7 @@ def parse_chat(file):
             mensaje_actual = {
                 "fecha":   pd.to_datetime(fecha_str, dayfirst=True),
                 "usuario": match.group(3).strip(),
-                "mensaje": limpiar_mensaje(match.group(4)),
+                "mensaje": normalizar_mensaje(limpiar_mensaje(match.group(4))),
             }
         elif mensaje_actual:
             # Línea que continúa el mensaje anterior (mensaje multilínea)
@@ -47,3 +48,13 @@ def limpiar_mensaje(texto):
     # Elimina el caracter de ancho cero típico de los exports de WhatsApp
     texto = texto.replace("\u200e", "").replace("\u200f", "")
     return texto.strip()
+
+def normalizar_mensaje(texto):
+    """Normaliza el texto: espacios múltiples, fechas y emojis."""
+    # Colapsa espacios múltiples en uno solo
+    texto = re.sub(r" +", " ", texto)
+    # Elimina espacios al inicio y al final
+    texto = texto.strip()
+    # Normaliza los emojis al formato estándar Unicode
+    texto = emoji_lib.demojize(emoji_lib.emojize(texto, language="alias"))
+    return texto
