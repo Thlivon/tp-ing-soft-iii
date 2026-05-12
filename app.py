@@ -1,7 +1,8 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
 from parser import parse_chat, chat_a_json
-from analytics import usuario_mas_activo
+from analytics import usuario_mas_activo, emoji_mas_utilizado
+import emoji as emoji_lib
 
 st.set_page_config(page_title="Analizador de chats de WhatsApp", layout="wide")
 
@@ -29,13 +30,17 @@ if archivo is not None:
         # Procesamos el archivo y convertimos el chat en un DataFrame
         df = parse_chat(archivo)
 
-        usuario, cantidad = usuario_mas_activo(df)
-        st.subheader("Usuario más activo")
-        st.write(f"{usuario} envió {cantidad} mensajes.")
-
         if df.empty:
             st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat de WhatsApp válido.")
         else:
             # Convertimos el DataFrame a JSON para uso posterior
             mensajes_json = chat_a_json(df)
             st.success(f"Chat procesado correctamente. Se encontraron {len(mensajes_json)} mensajes.")
+
+            usuario, cantidad = usuario_mas_activo(df)
+            st.subheader("Usuario más activo")
+            st.write(f"{usuario} envió {cantidad} mensajes.")
+            st.subheader("Emoji más usado")
+            emoji_texto, cantidad = emoji_mas_utilizado(df)
+            emoji = emoji_lib.emojize(emoji_texto)
+            st.write(f"{emoji} usado {cantidad} veces")
