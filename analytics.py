@@ -60,6 +60,7 @@ def horario_mas_activo(df):
 
     return franja, cantidad
 
+# Devuelve el porcentaje de mensajes enviados en cada dia de la semana, van ordenados de lunes a domingo.
 def actividad_por_dia(df):
     if df.empty:
         return {}
@@ -79,6 +80,19 @@ def actividad_por_dia(df):
     ]
 
     contador = contador.reindex(orden, fill_value=0)
+
+    porcentajes = round((contador / len(df)) * 100, 2)
+
+    return porcentajes
+
+# Devuelve los porcentajes de actividad ordenados de mayor a menor
+def ranking_actividad(df):
+    if df.empty:
+        return {}
+
+    dias = df["fecha"].dt.day_name()
+
+    contador = dias.value_counts()
 
     porcentajes = round((contador / len(df)) * 100, 2)
 
