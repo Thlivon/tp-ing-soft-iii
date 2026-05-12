@@ -24,11 +24,11 @@ def parse_chat(file):
             mensaje_actual = {
                 "fecha":   pd.to_datetime(fecha_str, dayfirst=True),
                 "usuario": match.group(3).strip(),
-                "mensaje": match.group(4),
+                "mensaje": limpiar_mensaje(match.group(4)),
             }
         elif mensaje_actual:
             # Línea que continúa el mensaje anterior (mensaje multilínea)
-            mensaje_actual["mensaje"] += f" {linea.strip()}"
+            mensaje_actual["mensaje"] += f" {limpiar_mensaje(linea.strip())}"
 
     # Guardamos el último mensaje que quedó pendiente
     if mensaje_actual:
@@ -39,3 +39,11 @@ def parse_chat(file):
 def chat_a_json(df):
     """Convierte el DataFrame del chat a una lista de diccionarios en formato JSON."""
     return df.to_dict(orient="records")
+
+def limpiar_mensaje(texto):
+    """Elimina caracteres invisibles, de control y corruptos del texto."""
+    # Elimina caracteres de control Unicode excepto saltos de línea y tabulaciones
+    texto = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", "", texto)
+    # Elimina el caracter de ancho cero típico de los exports de WhatsApp
+    texto = texto.replace("\u200e", "").replace("\u200f", "")
+    return texto.strip()
