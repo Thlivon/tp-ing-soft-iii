@@ -42,6 +42,7 @@ def emoji_mas_utilizado(df):
 
     return emoji_mas_usado, contador[emoji_mas_usado]
 
+# Devuelve la franja horaria en la que se envían más mensajes y la cantidad de mensajes enviados en esa franja.
 def horario_mas_activo(df):
     if df.empty:
         return None, 0
@@ -58,3 +59,27 @@ def horario_mas_activo(df):
     franja = f"{hora_inicio:02d}:00 - {hora_fin:02d}:00"
 
     return franja, cantidad
+
+def actividad_por_dia(df):
+    if df.empty:
+        return {}
+
+    dias = df["fecha"].dt.day_name()
+
+    contador = dias.value_counts()
+
+    orden = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ]
+
+    contador = contador.reindex(orden, fill_value=0)
+
+    porcentajes = round((contador / len(df)) * 100, 2)
+
+    return porcentajes
