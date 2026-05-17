@@ -1,0 +1,5 @@
+14/4/25, 10:00 - Juan: hola lunes
+14/4/25, 10:01 - Maria: buen lunes
+16/4/25, 10:00 - Juan: hola miercoles
+16/4/25, 10:01 - Maria: buen miercoles
+18/4/25, 10:00 - Juan: hola viernes

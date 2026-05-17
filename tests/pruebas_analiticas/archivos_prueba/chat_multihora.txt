@@ -1,0 +1,7 @@
+12/4/25, 08:00 - Juan: buen dia
+12/4/25, 08:30 - Maria: buen dia
+12/4/25, 14:00 - Juan: buenas tardes
+12/4/25, 14:30 - Maria: buenas tardes
+12/4/25, 21:00 - Juan: buenas noches
+12/4/25, 21:30 - Maria: buenas noches
+12/4/25, 21:45 - Juan: hasta manana

@@ -1,0 +1,3 @@
+Esto es una nota sin formato de chat.
+No tiene fechas ni nombres.
+Solo texto libre.
