@@ -50,9 +50,15 @@ def mostrar_resultados_temporales(df):
     mensajes_json = chat_a_json(df)
     st.success(f"Chat procesado correctamente. Se encontraron {len(mensajes_json)} mensajes.")
 
-    usuario, cantidad = usuario_mas_activo(df)
-    st.subheader("Usuario más activo")
-    st.write(f"{usuario} envió {cantidad} mensajes.")
+    # --- Fase 2.2: Visualización de Datos ---
+    st.header("📊 Resumen del Chat")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        usuario, cantidad = usuario_mas_activo(df)
+        st.metric(label="👑 Usuario más activo", value=str(usuario), delta=f"{cantidad} mensajes", delta_color="off")
+        
+    st.divider()
 
     emoji_texto, cantidad = emoji_mas_utilizado(df)
     st.subheader("Emoji más usado")
