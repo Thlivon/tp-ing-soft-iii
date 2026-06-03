@@ -10,6 +10,10 @@ def inicializar_estado():
     """Inicializa las variables de estado de la aplicación."""
     if "archivo_cargado" not in st.session_state:
         st.session_state.archivo_cargado = None
+    if "chat_procesado" not in st.session_state:
+        st.session_state.chat_procesado = False
+    if "df_chat" not in st.session_state:
+        st.session_state.df_chat = None
 
 def mostrar_pantalla_carga():
     """Muestra la interfaz inicial para cargar el archivo."""
@@ -24,8 +28,11 @@ def mostrar_pantalla_carga():
     with st.container():
         st.info("También podés arrastrar tu archivo directamente sobre el área de carga.")
 
-    # Guardamos el archivo en el estado de la sesión
-    st.session_state.archivo_cargado = archivo
+    # Si el archivo cambia, actualizamos el estado y reiniciamos el procesamiento
+    if st.session_state.archivo_cargado != archivo:
+        st.session_state.archivo_cargado = archivo
+        st.session_state.chat_procesado = False
+        st.session_state.df_chat = None
 
 def validar_archivo(archivo):
     """Valida que la extensión del archivo cargado sea correcta."""
@@ -78,7 +85,20 @@ def main():
     
     # Validamos si hay un archivo cargado
     if st.session_state.archivo_cargado is not None:
-        validar_archivo(st.session_state.archivo_cargado)
+        es_valido = validar_archivo(st.session_state.archivo_cargado)
+        
+        if es_valido and not st.session_state.chat_procesado:
+            if st.button("Procesar archivo", type="primary"):
+                df = parse_chat(st.session_state.archivo_cargado)
+                if not df.empty:
+                    st.session_state.df_chat = df
+                    st.session_state.chat_procesado = True
+                    st.rerun()
+                else:
+                    st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
+                    
+        if st.session_state.chat_procesado:
+            mostrar_resultados_temporales(st.session_state.df_chat)
 
 if __name__ == "__main__":
     main()
