@@ -65,9 +65,15 @@ def mostrar_resultados_temporales(df):
         
     st.divider()
 
+    # --- Gráfico de Franja Horaria ---
+    st.subheader("⏰ Actividad por Franja Horaria")
     franja, cantidad = horario_mas_activo(df)
-    st.subheader("Horario más activo")
-    st.write(f"Entre las {franja} se enviaron {cantidad} mensajes.")
+    st.write(f"**Horario pico:** {franja} ({cantidad} mensajes)")
+    
+    # Preparamos los datos completando las 24 horas para que el gráfico sea continuo
+    datos_horas = df["fecha"].dt.hour.value_counts().reindex(range(24), fill_value=0)
+    datos_horas.index = [f"{h:02d}:00" for h in datos_horas.index]
+    st.bar_chart(datos_horas)
 
     porcentajes = actividad_por_dia(df)
     st.subheader("Actividad por día de la semana")
