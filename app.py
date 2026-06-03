@@ -14,6 +14,8 @@ def inicializar_estado():
         st.session_state.chat_procesado = False
     if "df_chat" not in st.session_state:
         st.session_state.df_chat = None
+    if "uploader_key" not in st.session_state:
+        st.session_state.uploader_key = 0
 
 def mostrar_pantalla_carga():
     """Muestra la interfaz inicial para cargar el archivo."""
@@ -22,7 +24,8 @@ def mostrar_pantalla_carga():
 
     archivo = st.file_uploader(
         label="Seleccioná tu archivo de chat en formato .txt o .zip",
-        help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia"
+        help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia",
+        key=str(st.session_state.uploader_key)
     )
 
     with st.container():
@@ -99,6 +102,13 @@ def main():
                         st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
                     
         if st.session_state.chat_procesado:
+            if st.button("Restaurar", help="Elimina el chat actual y reinicia la aplicación"):
+                st.session_state.archivo_cargado = None
+                st.session_state.chat_procesado = False
+                st.session_state.df_chat = None
+                st.session_state.uploader_key += 1
+                st.rerun()
+                
             mostrar_resultados_temporales(st.session_state.df_chat)
 
 if __name__ == "__main__":
