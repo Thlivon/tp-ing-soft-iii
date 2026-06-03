@@ -22,17 +22,18 @@ def inicializar_estado():
 
 def mostrar_pantalla_carga():
     """Muestra la interfaz inicial para cargar el archivo."""
-    st.title("Analizador de chats de WhatsApp")
-    st.write("Seleccioná tu archivo de chat exportado desde WhatsApp para comenzar el análisis.")
+    with st.sidebar:
+        st.header("📂 Carga de Archivo")
+        st.write("Subí tu exportación de WhatsApp para comenzar el análisis.")
 
-    archivo = st.file_uploader(
-        label="Seleccioná tu archivo de chat en formato .txt o .zip",
-        help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia",
-        key=str(st.session_state.uploader_key)
-    )
+        archivo = st.file_uploader(
+            label="Formato .txt o .zip",
+            help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia",
+            key=str(st.session_state.uploader_key)
+        )
 
-    with st.container():
-        st.info("También podés arrastrar tu archivo directamente sobre el área de carga.")
+        if not st.session_state.chat_procesado:
+            st.info("También podés arrastrar tu archivo aquí.")
 
     # Si el archivo cambia, actualizamos el estado y reiniciamos el procesamiento
     if st.session_state.archivo_cargado != archivo:
@@ -115,32 +116,42 @@ def mostrar_resultados_temporales(df):
 
 def main():
     inicializar_estado()
+
+    # Título principal fijo
+    st.title("💬 Analizador de chats de WhatsApp")
+
     mostrar_pantalla_carga()
     
     # Validamos si hay un archivo cargado
     if st.session_state.archivo_cargado is not None:
-        es_valido = validar_archivo(st.session_state.archivo_cargado)
+        with st.sidebar:
+            es_valido = validar_archivo(st.session_state.archivo_cargado)
         
         if es_valido and not st.session_state.chat_procesado:
-            if st.button("Procesar archivo", type="primary"):
-                with st.spinner("Procesando el chat, por favor esperá..."):
-                    df = parse_chat(st.session_state.archivo_cargado)
-                    if not df.empty:
-                        st.session_state.df_chat = df
-                        st.session_state.chat_procesado = True
-                        st.rerun()
-                    else:
-                        st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
+            with st.sidebar:
+                if st.button("Procesar archivo", type="primary", use_container_width=True):
+                    with st.spinner("Procesando el chat, por favor esperá..."):
+                        df = parse_chat(st.session_state.archivo_cargado)
+                        if not df.empty:
+                            st.session_state.df_chat = df
+                            st.session_state.chat_procesado = True
+                            st.rerun()
+                        else:
+                            st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
                     
         if st.session_state.chat_procesado:
-            if st.button("Restaurar", help="Elimina el chat actual y reinicia la aplicación"):
-                st.session_state.archivo_cargado = None
-                st.session_state.chat_procesado = False
-                st.session_state.df_chat = None
-                st.session_state.uploader_key += 1
-                st.rerun()
+            with st.sidebar:
+                if st.button("Restaurar", help="Elimina el chat actual y reinicia la aplicación", use_container_width=True):
+                    st.session_state.archivo_cargado = None
+                    st.session_state.chat_procesado = False
+                    st.session_state.df_chat = None
+                    st.session_state.uploader_key += 1
+                    st.rerun()
                 
             mostrar_resultados_temporales(st.session_state.df_chat)
+    else:
+        st.info("👈 **Para comenzar, por favor subí un archivo desde el menú lateral.**")
+        st.markdown("Descubrí quién es el más activo, a qué hora hablan más, los días favoritos y la nube de palabras de tus chats.")
 
 if __name__ == "__main__":
     main()
