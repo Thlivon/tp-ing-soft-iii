@@ -18,7 +18,6 @@ def mostrar_pantalla_carga():
 
     archivo = st.file_uploader(
         label="Seleccioná tu archivo de chat en formato .txt o .zip",
-        type=["txt", "zip"],
         help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia"
     )
 
@@ -27,6 +26,14 @@ def mostrar_pantalla_carga():
 
     # Guardamos el archivo en el estado de la sesión
     st.session_state.archivo_cargado = archivo
+
+def validar_archivo(archivo):
+    """Valida que la extensión del archivo cargado sea correcta."""
+    extension = archivo.name.split(".")[-1].lower()
+    if extension not in ["txt", "zip"]:
+        st.error("Formato no válido. Solo se aceptan archivos .txt o .zip.")
+        return False
+    return True
 
 def mostrar_resultados_temporales(df):
     """Muestra temporalmente los resultados (se refactorizará en la Fase 2.2)."""
@@ -68,6 +75,10 @@ def mostrar_resultados_temporales(df):
 def main():
     inicializar_estado()
     mostrar_pantalla_carga()
+    
+    # Validamos si hay un archivo cargado
+    if st.session_state.archivo_cargado is not None:
+        validar_archivo(st.session_state.archivo_cargado)
 
 if __name__ == "__main__":
     main()
