@@ -1,5 +1,6 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
+import pandas as pd
 from parser import parse_chat, chat_a_json
 from analytics import usuario_mas_activo, emoji_mas_utilizado, horario_mas_activo, actividad_por_dia, ranking_actividad, frecuencia_palabras, ordenar_frecuencias
 import emoji as emoji_lib
@@ -75,14 +76,26 @@ def mostrar_resultados_temporales(df):
     datos_horas.index = [f"{h:02d}:00" for h in datos_horas.index]
     st.bar_chart(datos_horas)
 
-    porcentajes = actividad_por_dia(df)
-    st.subheader("Actividad por día de la semana")
-    st.bar_chart(porcentajes)
+    st.divider()
 
-    ranking = ranking_actividad(df)
-    st.subheader("Ranking de actividad por día de la semana")
-    for dia, porcentaje in ranking.items():
-        st.write(f"{dia}: {porcentaje}%")
+    # --- Gráfico de Actividad por Día ---
+    st.subheader("📅 Actividad por Día de la Semana")
+    col_grafico, col_ranking = st.columns([2, 1])
+    
+    with col_grafico:
+        porcentajes = actividad_por_dia(df)
+        # Traducimos los días al español para el gráfico
+        dias_es = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        # Usamos CategoricalIndex para forzar el orden cronológico y evitar que Streamlit lo ordene alfabéticamente
+        porcentajes.index = pd.CategoricalIndex(dias_es, categories=dias_es, ordered=True)
+        st.bar_chart(porcentajes)
+
+    with col_ranking:
+        st.write("**🏆 Ranking de mayor actividad**")
+        ranking = ranking_actividad(df)
+        traduccion = {"Monday": "Lunes", "Tuesday": "Martes", "Wednesday": "Miércoles", "Thursday": "Jueves", "Friday": "Viernes", "Saturday": "Sábado", "Sunday": "Domingo"}
+        for i, (dia, porcentaje) in enumerate(ranking.items(), 1):
+            st.write(f"**{i}. {traduccion.get(dia, dia)}**: {porcentaje}%")
 
     palabras_frecuentes = frecuencia_palabras(df)
     st.subheader("Palabras más frecuentes")
