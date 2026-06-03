@@ -58,12 +58,12 @@ def mostrar_resultados_temporales(df):
         usuario, cantidad = usuario_mas_activo(df)
         st.metric(label="👑 Usuario más activo", value=str(usuario), delta=f"{cantidad} mensajes", delta_color="off")
         
+    with col2:
+        emoji_texto, cantidad_emoji = emoji_mas_utilizado(df)
+        emoji_val = emoji_lib.emojize(emoji_texto) if emoji_texto else "Ninguno"
+        st.metric(label="🔥 Emoji más usado", value=emoji_val, delta=f"{cantidad_emoji} veces", delta_color="off")
+        
     st.divider()
-
-    emoji_texto, cantidad = emoji_mas_utilizado(df)
-    st.subheader("Emoji más usado")
-    emoji = emoji_lib.emojize(emoji_texto)
-    st.write(f"{emoji} usado {cantidad} veces")
 
     franja, cantidad = horario_mas_activo(df)
     st.subheader("Horario más activo")
