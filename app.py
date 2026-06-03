@@ -1,6 +1,8 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 from parser import parse_chat, chat_a_json
 from analytics import usuario_mas_activo, emoji_mas_utilizado, horario_mas_activo, actividad_por_dia, ranking_actividad, frecuencia_palabras, ordenar_frecuencias
 import emoji as emoji_lib
@@ -97,15 +99,19 @@ def mostrar_resultados_temporales(df):
         for i, (dia, porcentaje) in enumerate(ranking.items(), 1):
             st.write(f"**{i}. {traduccion.get(dia, dia)}**: {porcentaje}%")
 
-    palabras_frecuentes = frecuencia_palabras(df)
-    st.subheader("Palabras más frecuentes")
-    for palabra, frec in palabras_frecuentes.items():
-        st.write(f"{palabra}: {frec} veces")
+    st.divider()
 
-    palabras_ordenadas = ordenar_frecuencias(palabras_frecuentes)
-    st.subheader("Palabras más frecuentes ordenadas")
-    for palabra, frec in palabras_ordenadas:
-        st.write(f"{palabra}: {frec} veces")
+    # --- Nube de Palabras ---
+    st.subheader("☁️ Nube de Palabras")
+    palabras_frecuentes = frecuencia_palabras(df)
+    if palabras_frecuentes:
+        wordcloud = WordCloud(width=800, height=400, background_color="white", colormap="viridis").generate_from_frequencies(palabras_frecuentes)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis("off")
+        st.pyplot(fig)
+    else:
+        st.info("No hay suficientes palabras para generar la nube.")
 
 def main():
     inicializar_estado()
