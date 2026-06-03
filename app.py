@@ -89,13 +89,14 @@ def main():
         
         if es_valido and not st.session_state.chat_procesado:
             if st.button("Procesar archivo", type="primary"):
-                df = parse_chat(st.session_state.archivo_cargado)
-                if not df.empty:
-                    st.session_state.df_chat = df
-                    st.session_state.chat_procesado = True
-                    st.rerun()
-                else:
-                    st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
+                with st.spinner("Procesando el chat, por favor esperá..."):
+                    df = parse_chat(st.session_state.archivo_cargado)
+                    if not df.empty:
+                        st.session_state.df_chat = df
+                        st.session_state.chat_procesado = True
+                        st.rerun()
+                    else:
+                        st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
                     
         if st.session_state.chat_procesado:
             mostrar_resultados_temporales(st.session_state.df_chat)
