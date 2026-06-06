@@ -105,8 +105,10 @@ def frecuencia_palabras(df):
 
     # No cuento las palabras de la lista por ser conectores, preposiciones, artículos, etc. que no aportan al análisis
     STOPWORDS = {
-        "de", "la", "que", "el", "y", "a",
-        "en", "un", "una", "es", "por", ":[a-zA-Z0-9_&+-]+:"
+        "de", "la", "que", "el", "y", "a", "en", "un", "una", "es", "por",
+        "los", "las", "con", "para", "como", "pero", "o", "su", "te", "se",
+        "lo", "me", "mi", "si", "del", "al", "eso", "este", "esta", "ya",
+        "multimedia", "omitido", "omitida", "imagen", "audio", "sticker", "video", "documento"
     }
 
     contador = {}
@@ -116,14 +118,14 @@ def frecuencia_palabras(df):
         # Ignoro los emojis normalizados
         mensaje = re.sub(r":[a-zA-Z0-9_&+-]+:", "", mensaje)
 
-        palabras = mensaje.lower().split()
-
+        # Limpiamos signos de puntuación (reemplazando por espacio para no juntar palabras) y guiones bajos
+        mensaje_limpio = re.sub(r'[^\w\s]|_', ' ', mensaje.lower())
+        
+        palabras = mensaje_limpio.split()
 
         for palabra in palabras:
-            # Ignoro los signos de puntuacion para contar las palabras
-            palabra = palabra.strip(".,!?¿¡()[]{}:;\"'")
-
-            if palabra and palabra not in STOPWORDS:
+            # Excluimos palabras de 1 solo caracter, puramente numéricas y stopwords
+            if len(palabra) > 1 and not palabra.isdigit() and palabra not in STOPWORDS:
 
                 if palabra in contador:
                     contador[palabra] += 1
