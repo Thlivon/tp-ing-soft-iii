@@ -1,5 +1,8 @@
 # AQUÍ IRÁN LAS PRUEBAS PRUEBAS UNITARAS Y EN EL FUTURO SERÁ EL FRONTEND
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 from parser import parse_chat, chat_a_json
 from analytics import usuario_mas_activo, emoji_mas_utilizado, horario_mas_activo, actividad_por_dia, ranking_actividad, frecuencia_palabras, ordenar_frecuencias
 import emoji as emoji_lib
@@ -19,17 +22,18 @@ def inicializar_estado():
 
 def mostrar_pantalla_carga():
     """Muestra la interfaz inicial para cargar el archivo."""
-    st.title("Analizador de chats de WhatsApp")
-    st.write("Seleccioná tu archivo de chat exportado desde WhatsApp para comenzar el análisis.")
+    with st.sidebar:
+        st.header("📂 Carga de Archivo")
+        st.write("Subí tu exportación de WhatsApp para comenzar el análisis.")
 
-    archivo = st.file_uploader(
-        label="Seleccioná tu archivo de chat en formato .txt o .zip",
-        help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia",
-        key=str(st.session_state.uploader_key)
-    )
+        archivo = st.file_uploader(
+            label="Formato .txt o .zip",
+            help="Exportá tu chat desde WhatsApp: Menú -> Más -> Exportar chat -> Sin archivos multimedia",
+            key=str(st.session_state.uploader_key)
+        )
 
-    with st.container():
-        st.info("También podés arrastrar tu archivo directamente sobre el área de carga.")
+        if not st.session_state.chat_procesado:
+            st.info("También podés arrastrar tu archivo aquí.")
 
     # Si el archivo cambia, actualizamos el estado y reiniciamos el procesamiento
     if st.session_state.archivo_cargado != archivo:
@@ -50,66 +54,104 @@ def mostrar_resultados_temporales(df):
     mensajes_json = chat_a_json(df)
     st.success(f"Chat procesado correctamente. Se encontraron {len(mensajes_json)} mensajes.")
 
-    usuario, cantidad = usuario_mas_activo(df)
-    st.subheader("Usuario más activo")
-    st.write(f"{usuario} envió {cantidad} mensajes.")
+    # --- Fase 2.2: Visualización de Datos ---
+    st.header("📊 Resumen del Chat")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        usuario, cantidad = usuario_mas_activo(df)
+        st.metric(label="👑 Usuario más activo", value=str(usuario), delta=f"{cantidad} mensajes", delta_color="off")
+        
+    with col2:
+        emoji_texto, cantidad_emoji = emoji_mas_utilizado(df)
+        emoji_val = emoji_lib.emojize(emoji_texto) if emoji_texto else "Ninguno"
+        st.metric(label="🔥 Emoji más usado", value=emoji_val, delta=f"{cantidad_emoji} veces", delta_color="off")
+        
+    st.divider()
 
-    emoji_texto, cantidad = emoji_mas_utilizado(df)
-    st.subheader("Emoji más usado")
-    emoji = emoji_lib.emojize(emoji_texto)
-    st.write(f"{emoji} usado {cantidad} veces")
-
+    # --- Gráfico de Franja Horaria ---
+    st.subheader("⏰ Actividad por Franja Horaria")
     franja, cantidad = horario_mas_activo(df)
-    st.subheader("Horario más activo")
-    st.write(f"Entre las {franja} se enviaron {cantidad} mensajes.")
+    st.write(f"**Horario pico:** {franja} ({cantidad} mensajes)")
+    
+    # Preparamos los datos completando las 24 horas para que el gráfico sea continuo
+    datos_horas = df["fecha"].dt.hour.value_counts().reindex(range(24), fill_value=0)
+    datos_horas.index = [f"{h:02d}:00" for h in datos_horas.index]
+    st.bar_chart(datos_horas)
 
-    porcentajes = actividad_por_dia(df)
-    st.subheader("Actividad por día de la semana")
-    st.bar_chart(porcentajes)
+    st.divider()
 
-    ranking = ranking_actividad(df)
-    st.subheader("Ranking de actividad por día de la semana")
-    for dia, porcentaje in ranking.items():
-        st.write(f"{dia}: {porcentaje}%")
+    # --- Gráfico de Actividad por Día ---
+    st.subheader("📅 Actividad por Día de la Semana")
+    col_grafico, col_ranking = st.columns([2, 1])
+    
+    with col_grafico:
+        porcentajes = actividad_por_dia(df)
+        # Traducimos los días al español para el gráfico
+        dias_es = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        # Usamos CategoricalIndex para forzar el orden cronológico y evitar que Streamlit lo ordene alfabéticamente
+        porcentajes.index = pd.CategoricalIndex(dias_es, categories=dias_es, ordered=True)
+        st.bar_chart(porcentajes)
 
+    with col_ranking:
+        st.write("**🏆 Ranking de mayor actividad**")
+        ranking = ranking_actividad(df)
+        traduccion = {"Monday": "Lunes", "Tuesday": "Martes", "Wednesday": "Miércoles", "Thursday": "Jueves", "Friday": "Viernes", "Saturday": "Sábado", "Sunday": "Domingo"}
+        for i, (dia, porcentaje) in enumerate(ranking.items(), 1):
+            st.write(f"**{i}. {traduccion.get(dia, dia)}**: {porcentaje}%")
+
+    st.divider()
+
+    # --- Nube de Palabras ---
+    st.subheader("☁️ Nube de Palabras")
     palabras_frecuentes = frecuencia_palabras(df)
-    st.subheader("Palabras más frecuentes")
-    for palabra, frec in palabras_frecuentes.items():
-        st.write(f"{palabra}: {frec} veces")
-
-    palabras_ordenadas = ordenar_frecuencias(palabras_frecuentes)
-    st.subheader("Palabras más frecuentes ordenadas")
-    for palabra, frec in palabras_ordenadas:
-        st.write(f"{palabra}: {frec} veces")
+    if palabras_frecuentes:
+        wordcloud = WordCloud(width=800, height=400, background_color="white", colormap="viridis").generate_from_frequencies(palabras_frecuentes)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis("off")
+        st.pyplot(fig)
+    else:
+        st.info("No hay suficientes palabras para generar la nube.")
 
 def main():
     inicializar_estado()
+
+    # Título principal fijo
+    st.title("💬 Analizador de chats de WhatsApp")
+
     mostrar_pantalla_carga()
     
     # Validamos si hay un archivo cargado
     if st.session_state.archivo_cargado is not None:
-        es_valido = validar_archivo(st.session_state.archivo_cargado)
+        with st.sidebar:
+            es_valido = validar_archivo(st.session_state.archivo_cargado)
         
         if es_valido and not st.session_state.chat_procesado:
-            if st.button("Procesar archivo", type="primary"):
-                with st.spinner("Procesando el chat, por favor esperá..."):
-                    df = parse_chat(st.session_state.archivo_cargado)
-                    if not df.empty:
-                        st.session_state.df_chat = df
-                        st.session_state.chat_procesado = True
-                        st.rerun()
-                    else:
-                        st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
+            with st.sidebar:
+                if st.button("Procesar archivo", type="primary", use_container_width=True):
+                    with st.spinner("Procesando el chat, por favor esperá..."):
+                        df = parse_chat(st.session_state.archivo_cargado)
+                        if not df.empty:
+                            st.session_state.df_chat = df
+                            st.session_state.chat_procesado = True
+                            st.rerun()
+                        else:
+                            st.warning("No se encontraron mensajes. Verificá que el archivo sea un chat válido.")
                     
         if st.session_state.chat_procesado:
-            if st.button("Restaurar", help="Elimina el chat actual y reinicia la aplicación"):
-                st.session_state.archivo_cargado = None
-                st.session_state.chat_procesado = False
-                st.session_state.df_chat = None
-                st.session_state.uploader_key += 1
-                st.rerun()
+            with st.sidebar:
+                if st.button("Restaurar", help="Elimina el chat actual y reinicia la aplicación", use_container_width=True):
+                    st.session_state.archivo_cargado = None
+                    st.session_state.chat_procesado = False
+                    st.session_state.df_chat = None
+                    st.session_state.uploader_key += 1
+                    st.rerun()
                 
             mostrar_resultados_temporales(st.session_state.df_chat)
+    else:
+        st.info("👈 **Para comenzar, por favor subí un archivo desde el menú lateral.**")
+        st.markdown("Descubrí quién es el más activo, a qué hora hablan más, los días favoritos y la nube de palabras de tus chats.")
 
 if __name__ == "__main__":
     main()
