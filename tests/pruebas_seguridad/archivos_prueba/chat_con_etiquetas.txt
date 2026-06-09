@@ -1,0 +1,5 @@
+12/4/25, 21:00 - Juan: hola <b>como estas</b>
+12/4/25, 21:01 - Maria: <script>alert('hola')</script> todo bien?
+12/4/25, 21:02 - Juan: mira esto <i>en cursiva</i> y <u>subrayado</u>
+12/4/25, 21:03 - Maria: <img src=x onerror=alert(1)> que es esto
+12/4/25, 21:04 - Juan: nos vemos <a href="http://ejemplo.com">aca</a>
