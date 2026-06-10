@@ -1,0 +1,7 @@
+12/4/25, 21:00 - Juan: Este es un mensaje
+que tiene dos lineas.
+12/4/25, 21:01 - Maria: Respuesta normal.
+12/4/25, 21:02 - Juan: Otro mensaje largo
+con tres lineas
+en total.
+12/4/25, 21:03 - Maria: Ok!
