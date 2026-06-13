@@ -2,6 +2,8 @@
 import re
 import pandas as pd
 import emoji as emoji_lib
+import zipfile
+import io
 
 # Patrón que matchea el formato estándar de exportación de WhatsApp (Android)
 # Ejemplo de línea: 12/4/25, 21:03 - Nico: hola cómo andan
@@ -10,13 +12,44 @@ PATTERN = re.compile(
 )
 
 def parse_chat(file):
-    """Lee el archivo subido y devuelve un DataFrame con columnas: fecha, usuario, mensaje."""
-    lineas = file.read().decode("utf-8").splitlines()
     registros = []
     mensaje_actual = None
 
+    file.seek(0)
+    extension = file.name.split(".")[-1].lower()
+
+    if extension == "txt":
+        """Lee el archivo subido y devuelve un DataFrame con columnas: fecha, usuario, mensaje."""
+        contenido = file.read()
+        try:
+            lineas = contenido.decode("utf-8").splitlines()
+        except UnicodeDecodeError:
+            lineas = contenido.decode("latin-1").splitlines()
+
+    elif extension == "zip":
+        with zipfile.ZipFile(io.BytesIO(file.read())) as zip_ref:
+            archivos_txt = [
+                nombre
+                for nombre in zip_ref.namelist()
+                if nombre.endswith(".txt")
+            ]
+
+            if not archivos_txt:
+                return pd.DataFrame()
+
+            with zip_ref.open(archivos_txt[0]) as txt:
+                contenido = txt.read()
+                try:
+                    lineas = contenido.decode("utf-8").splitlines()
+                except UnicodeDecodeError:
+                    lineas = contenido.decode("latin-1").splitlines()
+
+    else:
+        return pd.DataFrame()
+
     for linea in lineas:
         match = PATTERN.match(linea)
+
         if match:
             # Si había un mensaje acumulado, lo guardamos antes de arrancar uno nuevo
             if mensaje_actual:
